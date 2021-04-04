@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema({
   name:{
@@ -12,7 +13,7 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    maxlength: 50
+    maxlength: 100
   },
   role: {
     type: Number,
@@ -26,6 +27,7 @@ const userSchema = mongoose.Schema({
     type: Number
   }
 })
+
 //스키마를 모델로 감싸준다.
 const User = mongoose.model('User', userSchema)
 
