@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const config = require('./config/key');
 
 const { User } = require("./models/User");
+const { auth } = require("./middleware/auth");
 
 //application/x-www-form-urlencoded 을 분석
 app.use(express.urlencoded({extended: true}))
@@ -25,10 +26,10 @@ mongoose.connect(config.mongoURI, { //연결
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World! hehe')
+  res.send('Hello World! ogogogo')
 })
 
-app.post('/register', async(req, res) => {
+app.post('/api/users/register', async (req, res) => {
   //회원 가입 할때 필요한 정보들을 client에서 가져오면 그것들을 DB에 넣어준다.
   //body-parser에 의해 클라이언트에서 보내는 정보를 req.body를 받을 수 있다.
   const user = new User(req.body);
@@ -44,7 +45,7 @@ app.post('/register', async(req, res) => {
   });
 })
 
-app.post('/login',async(req, res) =>{
+app.post('/api/users/login', async (req, res) =>{
   //요청된 이메일이 DB에 있는지 찾는다.
   const user = await User.findOne({ email: req.body.email });
   console.log(user);
@@ -71,6 +72,26 @@ app.post('/login',async(req, res) =>{
       message: "해당 유저가 존재하지 않습니다."
     })
   }
+})
+
+app.get('/api/users/auth', auth, (req, res) => {
+  //여기까지 미들웨어를 통과했다면, Auth가 True라는 것이다.
+  res.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name
+  })
+})
+
+app.get('/api/users/logout', auth, (req, res) => {
+  User.findOneAndUpdate({_id: req.user._id},
+    { token: "" },
+    (err, user) => {
+      if(err) return res.json({success: false, err});
+      return res.status(200).send({success: true})
+    })
 })
 
 app.listen(port, ()=> {
