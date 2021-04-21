@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const port = 5000
+const cors = require('cors');
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -12,22 +13,27 @@ const config = require('./config/key');
 const { User } = require("./models/User");
 const { auth } = require("./middleware/auth");
 
+const mongoose = require('mongoose');
 //application/x-www-form-urlencoded 을 분석
 app.use(express.urlencoded({extended: true}))
 //application/json타입을 분석
 app.use(express.json());
 app.use(cookieParser());
 
-const mongoose = require('mongoose')
+app.use(cors({
+  credentials: true,
+}))
+
 mongoose.connect(config.mongoURI, { //연결
   useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false //안쓰면 오류남
 }).then(()=> console.log('MongoDB Connected...'))
   .catch(err => console.log(err))
 
-
 app.get('/', (req, res) => {
   res.send('Hello World! ogogogo')
 })
+
+app.get('/api/hello', (req, res) => res.send('Hello World!~~~'))
 
 app.post('/api/users/register', async (req, res) => {
   //회원 가입 할때 필요한 정보들을 client에서 가져오면 그것들을 DB에 넣어준다.
